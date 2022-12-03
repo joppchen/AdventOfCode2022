@@ -14,8 +14,6 @@ namespace AoC2022.Day1
             Console.WriteLine($"Day 1:");
             const string filename = "day1";
 
-            //Console.WriteLine(Directory.GetCurrentDirectory());
-
             var textFile = $"../../../../../resources/{filename}.txt";
             //var textFile = $"../../../../../resources/{filename}_example.txt";
 
@@ -23,8 +21,6 @@ namespace AoC2022.Day1
             {
                 var lines = File.ReadLines(textFile).ToList();
                 var sums = new List<int>();
-                //var lines = File.ReadAllLines(textFile);
-                //var integers = SharedMethods.ParseStringArrayToInt(lines);
                 var sum = 0;
                 foreach (var line in lines)
                 {
@@ -48,6 +44,13 @@ namespace AoC2022.Day1
                 Console.WriteLine("TASK 1");
                 var watch = System.Diagnostics.Stopwatch.StartNew();
                 var result = maxSum; // Answer: 71300
+                watch.Stop();
+                Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
+
+                Console.WriteLine("");
+                Console.WriteLine("TASK 1");
+                watch = System.Diagnostics.Stopwatch.StartNew();
+                result = sums.OrderByDescending(x => x).Take(3).Sum(); // Answer: 209691
                 watch.Stop();
                 Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
             }
