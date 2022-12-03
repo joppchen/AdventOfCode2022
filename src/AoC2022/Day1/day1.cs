@@ -48,11 +48,11 @@ namespace AoC2022.Day1
                 Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
 
                 Console.WriteLine("");
-                Console.WriteLine("TASK 1");
+                Console.WriteLine("TASK 2");
                 watch = System.Diagnostics.Stopwatch.StartNew();
                 result = sums.OrderByDescending(x => x).Take(3).Sum(); // Answer: 209691
                 watch.Stop();
-                Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
+                Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
             }
             else
             {
