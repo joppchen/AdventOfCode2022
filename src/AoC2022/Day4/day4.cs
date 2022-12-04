@@ -39,13 +39,15 @@ namespace AoC2022.Day4
                 watch.Stop();
                 Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
 
-                // Console.WriteLine("");
-                // Console.WriteLine("TASK 2");
-                // watch = System.Diagnostics.Stopwatch.StartNew();
-                //
-                // result = Priorities(sharedItems).Sum(); // Answer:
-                // watch.Stop();
-                // Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
+                Console.WriteLine("");
+                Console.WriteLine("TASK 2");
+                watch = System.Diagnostics.Stopwatch.StartNew();
+
+                var overLapping = items.Select(item => item.Split(',')).Count(Overlaps);
+
+                result = overLapping; // Answer: 861
+                watch.Stop();
+                Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
             }
             else
             {
@@ -60,6 +62,22 @@ namespace AoC2022.Day4
             var range2 = assignments[1].Split('-');
             return int.Parse(range1[0]) <= int.Parse(range2[0]) &&
                    int.Parse(range1[1]) >= int.Parse(range2[1]);
+        }
+
+        private static bool Overlaps(IReadOnlyList<string> assignments)
+        {
+            var limitsA = assignments[0].Split('-').Select(int.Parse).ToArray();
+            var limitsB = assignments[1].Split('-').Select(int.Parse).ToArray();
+
+            var rangeA = Enumerable.Range(limitsA.First(), RangeCount(limitsA)).ToArray();
+            var rangeB = Enumerable.Range(limitsB.First(), RangeCount(limitsB)).ToArray();
+
+            return rangeA.Any(i => rangeB.Contains(i));
+        }
+
+        private static int RangeCount(int[] range)
+        {
+            return range.Last() - range.First() + 1;
         }
     }
 }
