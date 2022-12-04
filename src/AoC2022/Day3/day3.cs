@@ -27,22 +27,14 @@ namespace AoC2022.Day3
                     var firstHalf = item.Substring(0, item.Length / 2);
                     var secondHalf = item.Substring(item.Length / 2);
 
-                    foreach (var letter in firstHalf)
+                    foreach (var letter in firstHalf.Where(letter => secondHalf.Contains(letter)))
                     {
-                        if (secondHalf.Contains(letter))
-                        {
-                            sharedItems.Add(letter);
-                            break;
-                        }
+                        sharedItems.Add(letter);
+                        break;
                     }
                 }
 
-                const int uCaseConverter = -65 + 27; // A = 65
-                const int lCaseConverter = -97 + 1; // a = 97
-
-                var priorities = (from item in sharedItems
-                    let converter = char.IsLower(item) ? lCaseConverter : uCaseConverter
-                    select (int) item + converter).ToList();
+                var priorities = Priorities(sharedItems);
 
                 Console.WriteLine("TASK 1");
                 var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -60,21 +52,15 @@ namespace AoC2022.Day3
                 {
                     var groupRucksacks = items.GetRange(number, 3);
 
-                    foreach (var letter in groupRucksacks[0])
+                    foreach (var letter in groupRucksacks[0].Where(letter =>
+                        groupRucksacks[1].Contains(letter) && groupRucksacks[2].Contains(letter)))
                     {
-                        if (groupRucksacks[1].Contains(letter) && groupRucksacks[2].Contains(letter))
-                        {
-                            sharedItems.Add(letter);
-                            break;
-                        }
+                        sharedItems.Add(letter);
+                        break;
                     }
                 }
 
-                priorities.Clear();
-                priorities = (from item in sharedItems
-                    let converter = char.IsLower(item) ? lCaseConverter : uCaseConverter
-                    select (int) item + converter).ToList();
-                result = priorities.Sum(); // Answer: 2633
+                result = Priorities(sharedItems).Sum(); // Answer: 2633
                 watch.Stop();
                 Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
             }
@@ -82,6 +68,17 @@ namespace AoC2022.Day3
             {
                 Console.WriteLine($"File not found: '{textFile}'");
             }
+        }
+
+        private static IEnumerable<int> Priorities(IEnumerable<char> sharedItems)
+        {
+            const int uCaseConverter = -65 + 27; // A = 65
+            const int lCaseConverter = -97 + 1; // a = 97
+
+            var priorities = (from item in sharedItems
+                let converter = char.IsLower(item) ? lCaseConverter : uCaseConverter
+                select (int) item + converter).ToList();
+            return priorities;
         }
 
         private static IEnumerable<int> EveryNth<T>(IReadOnlyCollection<T> listToJump, int n)
