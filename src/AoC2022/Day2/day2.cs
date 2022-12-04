@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static AoC2022.Common.SharedMethods;
 
 namespace AoC2022.Day2
 {
@@ -98,11 +99,6 @@ namespace AoC2022.Day2
         {
             var myShapeIndex = (int) elfShape + goalToInt[goalOfRound];
             return (Shapes) Wrap(myShapeIndex - 1, goalToInt.Count) + 1; // A bit messy since my enum is 1-based
-        }
-
-        private static int Wrap(int index, int n)
-        {
-            return ((index % n) + n) % n;
         }
 
         private static Outcome EvaluateGameOutcome(Shapes myShape, Shapes elfShape)

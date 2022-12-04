@@ -85,6 +85,12 @@ namespace AoC2022.Common
 
             return (long) result;
         }
+
+        // "Circular" index look-up (in e.g. array or list)
+        public static int Wrap(int index, int n)
+        {
+            return ((index % n) + n) % n;
+        }
     }
 
     internal static class ArrayExtensions
