@@ -50,18 +50,49 @@ namespace AoC2022.Day3
                 watch.Stop();
                 Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
 
-                // Console.WriteLine("");
-                // Console.WriteLine("TASK 2");
-                // watch = System.Diagnostics.Stopwatch.StartNew();
+                Console.WriteLine("");
+                Console.WriteLine("TASK 2");
+                watch = System.Diagnostics.Stopwatch.StartNew();
 
+                // TASK2
+                sharedItems.Clear();
+                foreach (var number in EveryNth(items, 3))
+                {
+                    var groupRucksacks = items.GetRange(number, 3);
 
-                // result = myPoints; // Answer: 11258
-                // watch.Stop();
-                // Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
+                    foreach (var letter in groupRucksacks[0])
+                    {
+                        if (groupRucksacks[1].Contains(letter) && groupRucksacks[2].Contains(letter))
+                        {
+                            sharedItems.Add(letter);
+                            break;
+                        }
+                    }
+                }
+
+                priorities.Clear();
+                priorities = (from item in sharedItems
+                    let converter = char.IsLower(item) ? lCaseConverter : uCaseConverter
+                    select (int) item + converter).ToList();
+                result = priorities.Sum(); // Answer: 2633
+                watch.Stop();
+                Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
             }
             else
             {
                 Console.WriteLine($"File not found: '{textFile}'");
+            }
+        }
+
+        private static IEnumerable<int> EveryNth<T>(IReadOnlyCollection<T> listToJump, int n)
+        {
+            // Yield every Nth number in the list
+            for (var i = 0; i < listToJump.Count(); i++)
+            {
+                if (i % 3 == 0)
+                {
+                    yield return i;
+                }
             }
         }
     }

@@ -143,5 +143,11 @@ namespace AoC2022.Common
             list.Clear();
             list.AddRange(withoutDuplicates.ToList());
         }
+
+        public static List<T> GetRange<T>(this List<T> list, Range range)
+        {
+            var (start, length) = range.GetOffsetAndLength(list.Count);
+            return list.GetRange(start, length);
+        }
     }
 }
