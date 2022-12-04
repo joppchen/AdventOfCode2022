@@ -39,14 +39,14 @@ namespace AoC2022.Day2
                 var myCodesDict = new Dictionary<string, Shapes>
                     {{"X", Shapes.Rock}, {"Y", Shapes.Paper}, {"Z", Shapes.Scissor}};
 
+                // Task 1
                 var myPoints = 0;
                 foreach (var round in rounds)
                 {
                     var shapesInRound = round.Split(' ');
                     var elfShapeCode = shapesInRound[0];
                     var myShapeCode = shapesInRound[1];
-                    myPoints += (int) myCodesDict[myShapeCode];
-                    myPoints += (int) EvaluateGameOutcome(myCodesDict[myShapeCode], elfCodesDict[elfShapeCode]);
+                    myPoints = AddPointForRound(myPoints, myCodesDict[myShapeCode], elfCodesDict[elfShapeCode]);
                 }
 
                 Console.WriteLine("TASK 1");
@@ -55,17 +55,54 @@ namespace AoC2022.Day2
                 watch.Stop();
                 Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
 
-                // Console.WriteLine("");
-                // Console.WriteLine("TASK 2");
-                // watch = System.Diagnostics.Stopwatch.StartNew();
-                // result = sums.OrderByDescending(x => x).Take(3).Sum(); // Answer: 209691
-                // watch.Stop();
-                // Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
+
+                Console.WriteLine("");
+                Console.WriteLine("TASK 2");
+                watch = System.Diagnostics.Stopwatch.StartNew();
+
+                var goalCodes = new Dictionary<string, Outcome>
+                    {{"X", Outcome.Lose}, {"Y", Outcome.Draw}, {"Z", Outcome.Win}};
+
+                myPoints = 0;
+                var goalToInt = new Dictionary<Outcome, int> {{Outcome.Draw, 0}, {Outcome.Win, 1}, {Outcome.Lose, 2}};
+                foreach (var round in rounds)
+                {
+                    var shapesInRound = round.Split(' ');
+                    Shapes elfShape = elfCodesDict[shapesInRound[0]];
+
+                    Outcome goalOfRound = goalCodes[shapesInRound[1]];
+                    Shapes myChoice = ChooseCorrectShape(goalToInt, goalOfRound, elfShape);
+
+                    myPoints = AddPointForRound(myPoints, myChoice, elfShape);
+                }
+
+                result = myPoints; // Answer: 11258
+                watch.Stop();
+                Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
             }
             else
             {
                 Console.WriteLine($"File not found: '{textFile}'");
             }
+        }
+
+        private static int AddPointForRound(int myPoints, Shapes myShape, Shapes elfShape)
+        {
+            myPoints += (int) myShape;
+            myPoints += (int) EvaluateGameOutcome(myShape, elfShape);
+            return myPoints;
+        }
+
+        private static Shapes ChooseCorrectShape(IReadOnlyDictionary<Outcome, int> goalToInt, Outcome goalOfRound,
+            Shapes elfShape)
+        {
+            var myShapeIndex = (int) elfShape + goalToInt[goalOfRound];
+            return (Shapes) Wrap(myShapeIndex - 1, goalToInt.Count) + 1; // A bit messy since my enum is 1-based
+        }
+
+        private static int Wrap(int index, int n)
+        {
+            return ((index % n) + n) % n;
         }
 
         private static Outcome EvaluateGameOutcome(Shapes myShape, Shapes elfShape)
