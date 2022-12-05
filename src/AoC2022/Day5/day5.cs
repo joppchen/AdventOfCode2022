@@ -68,35 +68,48 @@ namespace AoC2022.Day5
                     var fromStackIndex = int.Parse(matches[1].Value) - 1;
                     var toStackIndex = int.Parse(matches[2].Value) - 1;
 
-                    // Move one crate at a time between stacks
-                    for (var i = 0; i < numberOfMoves; i++)
-                    {
-                        var crateType = stacks[fromStackIndex].Pop();
-                        stacks[toStackIndex].Push(crateType);
-                    }
+                    // MoveCratesBetweenStacksOneAtATime(numberOfMoves, stacks, fromStackIndex, toStackIndex); // Task 1
+                    MoveCratesBetweenSeveralAtATime(numberOfMoves, stacks, fromStackIndex, toStackIndex); // Task 2
                 }
 
                 var endMessage = stacks.Aggregate("", (current, stack) => current + stack.Pop());
 
-                Console.WriteLine("TASK 1");
+                Console.WriteLine("TASK 1/2");
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                var result = endMessage; // Answer: VWLCWGSDQ
+                var result = endMessage; // Answer: Task 1: VWLCWGSDQ, Task 2: TCGLQSLPW
                 watch.Stop();
-                Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
-
-                // Console.WriteLine("");
-                // Console.WriteLine("TASK 2");
-                // watch = System.Diagnostics.Stopwatch.StartNew();
-                //
-                // var overLapping = lines.Select(item => item.Split(',')).Count(Overlaps);
-                //
-                // result = overLapping; // Answer:
-                // watch.Stop();
-                // Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
+                Console.WriteLine($"Task 1/2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
             }
             else
             {
                 Console.WriteLine($"File not found: '{textFile}'");
+            }
+        }
+
+        private static void MoveCratesBetweenStacksOneAtATime(int numberOfMoves, IReadOnlyList<Stack<char>> stacks,
+            int fromStackIndex,
+            int toStackIndex)
+        {
+            // Move one crate at a time between stacks
+            for (var i = 0; i < numberOfMoves; i++)
+            {
+                var crateType = stacks[fromStackIndex].Pop();
+                stacks[toStackIndex].Push(crateType);
+            }
+        }
+
+        private static void MoveCratesBetweenSeveralAtATime(int numberOfCrates,
+            IReadOnlyList<Stack<char>> stacks, int fromStackIndex, int toStackIndex)
+        {
+            var crates = stacks[fromStackIndex].TopN(numberOfCrates).ToList();
+            foreach (var crate in crates.Reverse<char>())
+            {
+                stacks[toStackIndex].Push(crate);
+            }
+
+            for (var i = 0; i < numberOfCrates; i++)
+            {
+                stacks[fromStackIndex].Pop();
             }
         }
 
