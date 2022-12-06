@@ -27,13 +27,13 @@ namespace AoC2022.Day6
                 watch.Stop();
                 Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
 
-                // Console.WriteLine("");
-                // Console.WriteLine("TASK 2");
-                // watch = System.Diagnostics.Stopwatch.StartNew();
-                //
-                // result = 1337; // Answer:
-                // watch.Stop();
-                // Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
+                Console.WriteLine("");
+                Console.WriteLine("TASK 2");
+                watch = System.Diagnostics.Stopwatch.StartNew();
+
+                result = StartOfMessageMarker(stream); // Answer: 3605
+                watch.Stop();
+                Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
             }
             else
             {
@@ -43,10 +43,20 @@ namespace AoC2022.Day6
 
         private static int StartOfPacketMarker(char[] stream)
         {
-            for (var i = 0; i < stream.Length - 4; i++)
+            return StartOfMarker(stream, 4);
+        }
+
+        private static int StartOfMessageMarker(char[] stream)
+        {
+            return StartOfMarker(stream, 14);
+        }
+
+        private static int StartOfMarker(char[] stream, int markerLength)
+        {
+            for (var i = 0; i < stream.Length - markerLength; i++)
             {
-                if (!AllUniqueCharacters(stream.RangeSubset(i, 4))) continue;
-                return i + 4;
+                if (!AllUniqueCharacters(stream.RangeSubset(i, markerLength))) continue;
+                return i + markerLength;
             }
 
             throw new Exception("Start of Packet Marker was not found! Check your input.");
