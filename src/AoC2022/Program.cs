@@ -10,13 +10,13 @@ namespace AoC2022
         {
             Console.WriteLine($"Hello Advent of Code {Year}!");
 
-            var dayNumber = 5; // Current default
+            var dayNumber = 6; // Current default
 
             if (args.Length > 0) dayNumber = int.Parse(args[0]);
             Console.WriteLine($"Day to be calculated: Day {dayNumber}.");
             Console.WriteLine("");
 
-            Day5.Main.Solve(dayNumber);
+            Day6.Main.Solve(dayNumber);
         }
     }
 }
