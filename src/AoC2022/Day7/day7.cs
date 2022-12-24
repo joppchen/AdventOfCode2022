@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace AoC2022.Day7
@@ -18,7 +14,7 @@ namespace AoC2022.Day7
 
             var filename = "day" + Convert.ToString(dayNumber);
 
-            // var textFile = $"../../../../../resources/{filename}.txt";
+            //var textFile = $"../../../../../resources/{filename}.txt";
             var textFile = $"../../../../../resources/{filename}_example.txt";
 
             if (File.Exists(textFile))
@@ -26,8 +22,9 @@ namespace AoC2022.Day7
                 var terminalLines = File.ReadLines(textFile).ToList();
 
                 //INode currentDir = new ElfDir("current", null, null);
-                INode root = GenerateFileTreeMockup();
+                //INode root = GenerateFileTreeMockup();
                 INode rootGenerated = GenerateFileTreeFromTerminalOutput(terminalLines);
+                INode root = rootGenerated;
 
                 // Test: Find all directories in a given directory
                 var subDirs = ListDirsInDir(root);
@@ -47,7 +44,7 @@ namespace AoC2022.Day7
                 // Task 1
                 Console.WriteLine("TASK 1");
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                var result = 1337; // Answer:
+                var result = totalSizeCountingAllSubFiles; // Answer: 37176777 TOO HIGH!!
                 watch.Stop();
                 Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
 
@@ -70,9 +67,11 @@ namespace AoC2022.Day7
             string[] commands = {"cd", "ls"};
             string[] dirOperations = {"directory name (go to named child)", "/ (root folder)", ".. (go to parent)"};
             string[] listResults = {"123 abs", "dir xyz"};
-            
+
             INode root = ElfDir.Create("/", null, new List<INode>());
-            INode currentDir;
+            INode currentDir = root;
+
+            var lastCommand = "cd";
 
             foreach (var line in terminalLines)
             {
@@ -80,25 +79,66 @@ namespace AoC2022.Day7
                 {
                     if (Regex.Match(line, "cd").Success)
                     {
-                        if (line.Contains("/"))
-                        {
-                            // Already done further up
-                            // INode currentDir = root;
-                        }
+                        currentDir = ChangeDirectory(line, currentDir, root);
+                        lastCommand = "cd";
+                    }
 
-                        if (line.Contains(".."))
+                    if (Regex.Match(line, "ls").Success)
+                    {
+                        lastCommand = "ls";
+                    }
+                }
+                else
+                {
+                    if (lastCommand.Equals("ls"))
+                    {
+                        var lineElements = line.Split(" ");
+                        if (lineElements[0].Equals("dir"))
                         {
-                            
+                            AddSubDir(line, currentDir);
                         }
-                        else
+                        else if (long.TryParse(lineElements[0], out var fileSize))
                         {
-                            // step into
+                            var fileName = lineElements[1];
+                            INode newFile = ElfFile.Create(fileName, currentDir, fileSize);
+                            currentDir.Children.Add(newFile);
                         }
                     }
                 }
             }
 
-            throw new NotImplementedException();
+            return root;
+        }
+
+        private static void AddSubDir(string line, INode currentDir)
+        {
+            var folderName = line.Split(" ")[1];
+            INode newDir = ElfDir.Create(folderName, parent: currentDir, new List<INode>());
+            currentDir.Children.Add(newDir);
+        }
+
+        private static INode ChangeDirectory(string line, INode currentDir, INode root)
+        {
+            if (line.Contains("/"))
+            {
+                //cd /
+                currentDir = root;
+            }
+            else if (line.Contains(".."))
+            {
+                currentDir = currentDir.Parent;
+            }
+            else
+            {
+                // step into, here meaning add child directory
+                var folderName = line.Split(" ")[2];
+                //INode newDir = ElfDir.Create(folderName, parent:currentDir, new List<INode>());
+                //currentDir.Children.Add(newDir);
+                //currentDir = newDir;
+                currentDir = currentDir.Children.Find(d => d.Name.Equals(folderName));
+            }
+
+            return currentDir;
         }
 
         private static INode GenerateFileTreeMockup()
