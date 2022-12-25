@@ -17,6 +17,9 @@ namespace AoC2022.Day7
             var textFile = $"../../../../../resources/{filename}.txt";
             //var textFile = $"../../../../../resources/{filename}_example.txt";
 
+            const long totalDiskSpace = 70000000;
+            const long minimumRequiredUnusedSpace = 30000000;
+
             if (File.Exists(textFile))
             {
                 var terminalLines = File.ReadLines(textFile).ToList();
@@ -31,6 +34,9 @@ namespace AoC2022.Day7
                 var totalNumberOfFilesInRoot = AllFilesInDir(root);
                 var sizeOfAllFilesInRoot = AllFilesInDir(root).Sum(f => f.Size);
 
+                // Task 1
+                Console.WriteLine("TASK 1");
+                var watch = System.Diagnostics.Stopwatch.StartNew();
                 var goodCandidatesForDeletion = AllSubDirs(root)
                     .Where(dir => AllFilesInDir(dir).Sum(f => f.Size) <= 100000).ToList();
                 var totalSizeCountingAllSubFiles = goodCandidatesForDeletion.Sum(d =>
@@ -38,20 +44,25 @@ namespace AoC2022.Day7
                 var totalSizeAlternativeMethod =
                     goodCandidatesForDeletion.Sum(dir => AllFilesInDir(dir).Sum(f => f.Size));
 
-                // Task 1
-                Console.WriteLine("TASK 1");
-                var watch = System.Diagnostics.Stopwatch.StartNew();
                 var result = totalSizeCountingAllSubFiles; // Answer: 1543140
                 watch.Stop();
                 Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
 
-                // Console.WriteLine("");
-                // Console.WriteLine("TASK 2");
-                // watch = System.Diagnostics.Stopwatch.StartNew();
-                //
-                // result = 1337; // Answer:
-                // watch.Stop();
-                // Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
+                Console.WriteLine("");
+                Console.WriteLine("TASK 2");
+                watch = System.Diagnostics.Stopwatch.StartNew();
+                var unusedSpace = totalDiskSpace - sizeOfAllFilesInRoot;
+                var spaceNeededToBeFreedUp = minimumRequiredUnusedSpace - unusedSpace;
+                // List all directories with size larger than or equal to needed space
+                var candidateForDeletion =
+                    allDirsInclRoot.Where(dir => AllFilesInDir(dir).Sum(f => f.Size) >= spaceNeededToBeFreedUp);
+                var smallestCandidateSize = candidateForDeletion.Min(dir => AllFilesInDir(dir).Sum(f => f.Size));
+                // If needed to select actual directory:
+                //INode smallestCandidate = candidateForDeletion.Aggregate((min, x) => AllFilesInDir(x).Sum(f => f.Size) < AllFilesInDir(min).Sum(f => f.Size) ? x : min);
+
+                result = smallestCandidateSize; // Answer: 1117448
+                watch.Stop();
+                Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
             }
             else
             {
