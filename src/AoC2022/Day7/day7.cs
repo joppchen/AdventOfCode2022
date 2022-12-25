@@ -14,37 +14,34 @@ namespace AoC2022.Day7
 
             var filename = "day" + Convert.ToString(dayNumber);
 
-            //var textFile = $"../../../../../resources/{filename}.txt";
-            var textFile = $"../../../../../resources/{filename}_example.txt";
+            var textFile = $"../../../../../resources/{filename}.txt";
+            //var textFile = $"../../../../../resources/{filename}_example.txt";
 
             if (File.Exists(textFile))
             {
                 var terminalLines = File.ReadLines(textFile).ToList();
 
-                //INode currentDir = new ElfDir("current", null, null);
-                //INode root = GenerateFileTreeMockup();
-                INode rootGenerated = GenerateFileTreeFromTerminalOutput(terminalLines);
-                INode root = rootGenerated;
+                INode root = GenerateFileTreeFromTerminalOutput(terminalLines);
 
-                // Test: Find all directories in a given directory
-                var subDirs = ListDirsInDir(root);
-                var allSubDirs = ListAllDirs(root);
-                var filesInDir = ListFilesInDir(root);
-                var allFiles = ListAllFiles(root);
-                var totalSize = filesInDir.Sum(x => x.Size);
+                // Tests for structuring thoughts
+                var immediateSubDirsInRoot = ImmediateSubDirs(root);
+                var allDirsInclRoot = AllSubDirs(root);
+                var immediateFilesInRoot = ImmediateFilesInDir(root);
+                var sizeOfImmediateFilesInRoot = ImmediateFilesInDir(root).Sum(x => x.Size);
+                var totalNumberOfFilesInRoot = AllFilesInDir(root);
+                var sizeOfAllFilesInRoot = AllFilesInDir(root).Sum(f => f.Size);
 
-                var goodCandidatesForDeletion =
-                    allSubDirs.Where(d => ListFilesInDir(d).Sum(f => f.Size) <= 100000).ToList();
-                var totalSizeOnlyCountingImmediateFiles =
-                    goodCandidatesForDeletion.Sum(d => ListFilesInDir(d).Sum(f => f.Size));
+                var goodCandidatesForDeletion = AllSubDirs(root)
+                    .Where(dir => AllFilesInDir(dir).Sum(f => f.Size) <= 100000).ToList();
                 var totalSizeCountingAllSubFiles = goodCandidatesForDeletion.Sum(d =>
-                    ListAllDirs(d).Sum(dr => ListFilesInDir(dr).Sum(f => f.Size)));
-
+                    AllSubDirs(d).Sum(dr => ImmediateFilesInDir(dr).Sum(f => f.Size)));
+                var totalSizeAlternativeMethod =
+                    goodCandidatesForDeletion.Sum(dir => AllFilesInDir(dir).Sum(f => f.Size));
 
                 // Task 1
                 Console.WriteLine("TASK 1");
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                var result = totalSizeCountingAllSubFiles; // Answer: 37176777 TOO HIGH!!
+                var result = totalSizeCountingAllSubFiles; // Answer: 1543140
                 watch.Stop();
                 Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
 
@@ -62,12 +59,13 @@ namespace AoC2022.Day7
             }
         }
 
+        private static IEnumerable<INode> AllFilesInDir(INode dir)
+        {
+            return AllSubDirs(dir).SelectMany(ImmediateFilesInDir).ToList();
+        }
+
         private static INode GenerateFileTreeFromTerminalOutput(List<string> terminalLines)
         {
-            string[] commands = {"cd", "ls"};
-            string[] dirOperations = {"directory name (go to named child)", "/ (root folder)", ".. (go to parent)"};
-            string[] listResults = {"123 abs", "dir xyz"};
-
             INode root = ElfDir.Create("/", null, new List<INode>());
             INode currentDir = root;
 
@@ -90,19 +88,17 @@ namespace AoC2022.Day7
                 }
                 else
                 {
-                    if (lastCommand.Equals("ls"))
+                    if (!lastCommand.Equals("ls")) continue;
+                    var lineElements = line.Split(" ");
+                    if (lineElements[0].Equals("dir"))
                     {
-                        var lineElements = line.Split(" ");
-                        if (lineElements[0].Equals("dir"))
-                        {
-                            AddSubDir(line, currentDir);
-                        }
-                        else if (long.TryParse(lineElements[0], out var fileSize))
-                        {
-                            var fileName = lineElements[1];
-                            INode newFile = ElfFile.Create(fileName, currentDir, fileSize);
-                            currentDir.Children.Add(newFile);
-                        }
+                        AddSubDir(line, currentDir);
+                    }
+                    else if (long.TryParse(lineElements[0], out var fileSize))
+                    {
+                        var fileName = lineElements[1];
+                        INode newFile = ElfFile.Create(fileName, currentDir, fileSize);
+                        currentDir.Children.Add(newFile);
                     }
                 }
             }
@@ -132,97 +128,31 @@ namespace AoC2022.Day7
             {
                 // step into, here meaning add child directory
                 var folderName = line.Split(" ")[2];
-                //INode newDir = ElfDir.Create(folderName, parent:currentDir, new List<INode>());
-                //currentDir.Children.Add(newDir);
-                //currentDir = newDir;
                 currentDir = currentDir.Children.Find(d => d.Name.Equals(folderName));
             }
 
             return currentDir;
         }
 
-        private static INode GenerateFileTreeMockup()
+        private static IEnumerable<INode> ImmediateSubDirs(INode dir)
         {
-            INode root = ElfDir.Create("/", null, new List<INode>());
-            //cd /
-            INode currentDir = root;
-            // ls --> for each item until next command, add to parents child list
-            INode aDir = ElfDir.Create("a", root, new List<INode>());
-            currentDir.Children.Add(aDir);
-            INode bFile = ElfFile.Create("b.txt", root, 14848514);
-            currentDir.Children.Add(bFile);
-            INode cFile = ElfFile.Create("c.dat", root, 8504156);
-            currentDir.Children.Add(cFile);
-            INode dDir = ElfDir.Create("d", root, new List<INode>());
-            currentDir.Children.Add(dDir);
-            // cd a
-            currentDir = aDir;
-            // ls
-            INode eDir = ElfDir.Create("e", aDir, new List<INode>());
-            currentDir.Children.Add(eDir);
-            INode fFile = ElfFile.Create("f", aDir, 29116);
-            currentDir.Children.Add(fFile);
-            INode gFile = ElfFile.Create("g", aDir, 2557);
-            currentDir.Children.Add(gFile);
-            INode hFile = ElfFile.Create("h.lst", aDir, 62596);
-            currentDir.Children.Add(hFile);
-            // cd e
-            currentDir = eDir;
-            // ls
-            INode iFile = ElfFile.Create("i", eDir, 584);
-            currentDir.Children.Add(iFile);
-            // cd ..
-            currentDir = currentDir.Parent;
-            // cd ..
-            currentDir = currentDir.Parent;
-            // cd d
-            currentDir = dDir;
-            // ls
-            var jFile = ElfFile.Create("j", dDir, 4060174);
-            currentDir.Children.Add(jFile);
-            var dLogFile = ElfFile.Create("d.log", dDir, 8033020);
-            currentDir.Children.Add(dLogFile);
-            var dExtFile = ElfFile.Create("d.ext", dDir, 5626152);
-            currentDir.Children.Add(dExtFile);
-            var kFile = ElfFile.Create("k", dDir, 7214296);
-            currentDir.Children.Add(kFile);
-            return root;
-        }
-
-        private static IEnumerable<INode> ListDirsInDir(INode dir)
-        {
-            // return dir.Children.FindAll(n => n.Size == 0);
             return dir.Children.FindAll(n => n is ElfDir);
         }
 
-        private static IEnumerable<INode> ListFilesInDir(INode dir)
+        private static IEnumerable<INode> ImmediateFilesInDir(INode dir)
         {
             return dir.Children.FindAll(n => n is ElfFile);
         }
 
-        private static IEnumerable<INode> ListAllDirs(INode dir)
+        private static IEnumerable<INode> AllSubDirs(INode dir)
         {
             var accumulatedSubDirs = new List<INode> {dir};
-            var subDirs = ListDirsInDir(dir).ToList();
+            var subDirs = ImmediateSubDirs(dir).ToList();
             if (!subDirs.Any()) return accumulatedSubDirs;
 
             foreach (INode subDir in subDirs)
             {
-                accumulatedSubDirs = accumulatedSubDirs.Concat(ListAllDirs(subDir)).ToList();
-            }
-
-            return accumulatedSubDirs;
-        }
-
-        private static IEnumerable<INode> ListAllFiles(INode dir)
-        {
-            var accumulatedSubDirs = new List<INode> {dir};
-            var subDirs = ListDirsInDir(dir).ToList();
-            if (!subDirs.Any()) return accumulatedSubDirs;
-
-            foreach (INode subDir in subDirs)
-            {
-                accumulatedSubDirs = accumulatedSubDirs.Concat(ListAllDirs(subDir)).ToList();
+                accumulatedSubDirs = accumulatedSubDirs.Concat(AllSubDirs(subDir)).ToList();
             }
 
             return accumulatedSubDirs;
@@ -231,11 +161,6 @@ namespace AoC2022.Day7
         private static bool IsCommand(string line)
         {
             return line[0] == '$';
-        }
-
-        internal static void ParseCommandLine(string line)
-        {
-            // ls, cd
         }
     }
 
