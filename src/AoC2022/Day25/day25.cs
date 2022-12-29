@@ -18,26 +18,16 @@ namespace AoC2022.Day25
 
             if (File.Exists(textFile))
             {
-                var snafuLines = File.ReadLines(textFile).ToList();
-
                 // Task 1
                 Console.WriteLine("TASK 1");
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 
-                var decimalSum = snafuLines.Select(ConvertFromSNAFUToDecimal).Sum();
-                var snafuSum = ConvertFromDecimalToSNAFU(decimalSum);
+                var result =
+                    File.ReadLines(textFile).Select(ConvertFromSNAFUToDecimal).Sum()
+                        .ToSNAFU(); // Answer: 2----0=--1122=0=0021
 
-                var result = snafuSum; // Answer: 2----0=--1122=0=0021
                 watch.Stop();
                 Console.WriteLine($"Task 1: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
-
-                //Console.WriteLine("");
-                //Console.WriteLine("TASK 2");
-                //watch = System.Diagnostics.Stopwatch.StartNew();
-                //
-                //result = 1337; // Answer:
-                //watch.Stop();
-                //Console.WriteLine($"Task 2: {result}. Elapsed time [ms]: {watch.ElapsedMilliseconds}");
             }
             else
             {
@@ -54,15 +44,12 @@ namespace AoC2022.Day25
                 .Select((t, i) => snafuSymbols2DecimalDigits[t] * (long) Math.Pow(5, snafuVal.Length - 1 - i)).Sum();
         }
 
-        public static string ConvertFromDecimalToSNAFU(long decVal)
+        public static string ToSNAFU(this long decVal)
         {
-            return ConvertSNAFUDigitsToSNAFUSymbols(
-                ConvertDecimalDigitsToSNAFUDigits(
-                    ConvertStringNumberToLongArray(
-                        ConvertFromDecimalToOtherBase(decVal, 5))));
+            return decVal.ToBase(5).ToLongArray().ToSNAFUDigits().ToSNAFUSymbols();
         }
 
-        public static string ConvertFromDecimalToOtherBase(long decVal, long radix)
+        public static string ToBase(this long decVal, long radix)
         {
             var backwards = "";
             while (decVal >= 1)
@@ -83,12 +70,12 @@ namespace AoC2022.Day25
             return otherBaseVal;
         }
 
-        public static long[] ConvertStringNumberToLongArray(string sNumber)
+        public static long[] ToLongArray(this string sNumber)
         {
-            return sNumber.Select(n => (long)(n - '0')).ToArray();
+            return sNumber.Select(n => (long) (n - '0')).ToArray();
         }
 
-        public static long[] ConvertDecimalDigitsToSNAFUDigits(long[] decNumber)
+        public static long[] ToSNAFUDigits(this long[] decNumber)
         {
             // Array needs to be long enough to handle potential spill-over to the Most Significant Digit
             var longArray = new long[decNumber.Length + 1];
@@ -123,7 +110,7 @@ namespace AoC2022.Day25
             return decNumber;
         }
 
-        public static string ConvertSNAFUDigitsToSNAFUSymbols(IEnumerable<long> iNumber)
+        public static string ToSNAFUSymbols(this IEnumerable<long> iNumber)
         {
             var decimalDigits2SnafuDigits = new Dictionary<long, string>
                 {{-2, "="}, {-1, "-"}, {0, "0"}, {1, "1"}, {2, "2"}};

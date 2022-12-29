@@ -18,7 +18,7 @@ namespace TestAoC
             };
             for (var i = 0; i < testDecimals.Length; i++)
             {
-                Assert.Equal(snafuResults[i], Main.ConvertFromDecimalToSNAFU(testDecimals[i]));
+                Assert.Equal(snafuResults[i], testDecimals[i].ToSNAFU());
             }
         }
 
@@ -26,14 +26,14 @@ namespace TestAoC
         public void DecimalToSnafuWithDecimalDigits()
         {
             // Part of process of converting Decimal 4890 to SNAFU 2=-1=0
-            Assert.Equal("124030", Main.ConvertFromDecimalToOtherBase(4890, SnafuRadix));
+            Assert.Equal("124030", Main.ToBase(4890, SnafuRadix));
         }
 
         [Fact]
         public void TestStringNumberToLongArray()
         {
             // Part of process of converting Decimal 4890 to SNAFU 2=-1=0
-            Assert.Equal(new long[] {1, 2, 4, 0, 3, 0}, Main.ConvertStringNumberToLongArray("124030"));
+            Assert.Equal(new long[] {1, 2, 4, 0, 3, 0}, "124030".ToLongArray());
         }
 
         [Fact]
@@ -41,14 +41,14 @@ namespace TestAoC
         {
             // Part of process of converting Decimal 4890 to SNAFU 2=-1=0
             Assert.Equal(new long[] {2, -2, -1, 1, -2, 0},
-                Main.ConvertDecimalDigitsToSNAFUDigits(new long[] {1, 2, 4, 0, 3, 0}));
+                new long[] {1, 2, 4, 0, 3, 0}.ToSNAFUDigits());
         }
 
         [Fact]
         public void TestSnafuDigitsToSnafuSymbols()
         {
             // Part of process of converting Decimal 4890 to SNAFU 2=-1=0
-            Assert.Equal("2=-1=0", Main.ConvertSNAFUDigitsToSNAFUSymbols(new long[] {2, -2, -1, 1, -2, 0}));
+            Assert.Equal("2=-1=0", new long[] {2, -2, -1, 1, -2, 0}.ToSNAFUSymbols());
         }
     }
 }
